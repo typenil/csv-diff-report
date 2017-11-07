@@ -179,8 +179,12 @@ class CSVDiff
 
         def columns_with_changes_detected(file_diff, out_fields)
             cols_with_value = []
-            file_diff.diffs.each {|key, diff| out_fields.each { |f| cols_with_value << f if diff[f].is_a?(Array) } }
-            cols_with_value.uniq
+            file_diff.diffs.each { |key, diff| out_fields.each { |f| cols_with_value << f if value_mismatch?(diff, f) } }
+            cols_with_value.uniq!
+        end
+
+        def value_mismatch?(diff, f)
+            diff[f].is_a?(Array) && diff[f][1].to_s.strip != diff[f][0].to_s.strip
         end
 
         def include_column?(cols_with_value, file_diff, field)
