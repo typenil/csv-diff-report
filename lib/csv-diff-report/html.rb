@@ -33,7 +33,6 @@ class CSVDiff
             path
         end
 
-
         # Returns the HTML head content, which contains the styles used for diffing.
         def html_styles
             style = <<-EOT
@@ -131,10 +130,12 @@ class CSVDiff
             body << '</p>'
 
             out_fields = output_fields(file_diff)
+            cols_with_value = columns_with_changes_detected(file_diff, out_fields)
+
             body << '<table>'
             body << '<thead><tr>'
             out_fields.each do |fld|
-                body << "<th>#{fld.is_a?(Symbol) ? titleize(fld) : fld}</th>"
+                body << "<th>#{fld.is_a?(Symbol) ? titleize(fld) : fld}</th>" if include_column?(cols_with_value, file_diff, fld)
             end
             body << '</tr></thead>'
             body << '<tbody>'
@@ -162,11 +163,13 @@ class CSVDiff
                         style = 'matched'
                         d = file_diff.right[key] && file_diff.right[key][field]
                     end
-                    body << '<td>'
-                    body << "<span class='delete'>#{CGI.escapeHTML(old.to_s)}</span>" if old
-                    body << '<br>' if old && old.to_s.length > 10
-                    body << "<span#{style ? " class='#{style}'" : ''}>#{CGI.escapeHTML(new.to_s)}</span>"
-                    body << '</td>'
+                    if include_column?(cols_with_value, file_diff, field)
+                        body << '<td>'
+                        body << "<span class='delete'>#{CGI.escapeHTML(old.to_s)}</span>" if old
+                        body << '<br>' if old && old.to_s.length > 10
+                        body << "<span#{style ? " class='#{style}'" : ''}>#{CGI.escapeHTML(new.to_s)}</span>"
+                        body << '</td>'
+                    end
                 end
                 body << '</tr>'
             end
@@ -174,6 +177,19 @@ class CSVDiff
             body << '</table>'
         end
 
+        def columns_with_changes_detected(file_diff, out_fields)
+            cols_with_value = []
+            file_diff.diffs.each {|key, diff| out_fields.each { |f| cols_with_value << f if diff[f].is_a?(Array) } }
+            cols_with_value.uniq
+        end
+
+        def include_column?(cols_with_value, file_diff, field)
+            cols_with_value.include?(field) ||
+            file_diff.key_fields.include?(field) ||
+            field == :row ||
+            field == :action ||
+            field == :sibling_position
+        end
     end
 
 end
