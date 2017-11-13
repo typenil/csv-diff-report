@@ -188,7 +188,7 @@ class CSVDiff
         end
 
         def include_column?(cols_with_value, file_diff, field)
-            cols_with_value.include?(field) ||
+            (!cols_with_value.nil? && cols_with_value.include?(field)) ||
             file_diff.key_fields.include?(field) ||
             field == :row ||
             field == :action ||
