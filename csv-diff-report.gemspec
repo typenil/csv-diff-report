@@ -1,6 +1,6 @@
 GEMSPEC = Gem::Specification.new do |s|
     s.name = "csv-diff-report"
-    s.version = "0.3.5"
+    s.version = "0.3.6"
     s.authors = ["Adam Gardiner"]
     s.date = "2017-05-17"
     s.summary = "CSV Diff Report is a library for generating diff reports using the CSV Diff gem"
